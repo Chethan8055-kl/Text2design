@@ -2,21 +2,25 @@ import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import cors from "cors";
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
-
 
 dotenv.config();
+
 const app = express();
 app.use(express.json());
 
-// server.js
+// ✅ Enable CORS (allow frontend URL or fallback to *)
+app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`API on ${PORT}`));
-
 const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
-console.log("Stability API Key:", STABILITY_API_KEY);
 
-// ✅ Root route for testing
+if (!STABILITY_API_KEY) {
+  console.error("❌ Missing STABILITY_API_KEY in .env");
+  process.exit(1);
+}
+console.log("✅ Stability API Key loaded");
+
+// ✅ Health check route
 app.get("/", (req, res) => {
   res.send("✅ Backend running with Stability AI. Use POST /api/generate-image");
 });
@@ -30,7 +34,7 @@ app.post("/api/generate-image", async (req, res) => {
       return res.status(400).json({ error: "Prompt is required" });
     }
 
-    // default to 3 images if not specified
+    // Default to 3 images
     const samples = count && count > 0 ? count : 3;
 
     const response = await fetch(
@@ -45,14 +49,15 @@ app.post("/api/generate-image", async (req, res) => {
           text_prompts: [{ text: prompt }],
           cfg_scale: 7,
           samples: samples,
-          steps: 30
+          steps: 30,
         }),
       }
     );
 
     if (!response.ok) {
       const err = await response.text();
-      throw new Error(err);
+      console.error("❌ API Error:", err);
+      return res.status(500).json({ error: err });
     }
 
     const data = await response.json();
@@ -63,11 +68,12 @@ app.post("/api/generate-image", async (req, res) => {
     res.json({ images });
 
   } catch (err) {
-    console.error("❌ Error:", err.message);
+    console.error("❌ Server Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.listen(PORT, () =>
-  console.log(`🚀 Backend running at http://localhost:${PORT}`)
-);
+// ✅ Single listen (no duplicates!)
+app.listen(PORT, () => {
+  console.log(`🚀 Backend running at http://localhost:${PORT}`);
+});
