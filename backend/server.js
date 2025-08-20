@@ -6,7 +6,10 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-const PORT = 5000;
+// server.js
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`API on ${PORT}`));
+
 const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
 console.log("Stability API Key:", STABILITY_API_KEY);
 
