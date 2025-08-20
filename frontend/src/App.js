@@ -59,10 +59,10 @@ function App() {
     setError("");
     setImages([]);
     try {
-      const res = await fetch("/api/generate-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, useCase, count })
+      const res = await fetch("https://text2design-5.onrender.com/api/generate-image", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ prompt, useCase, count })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
