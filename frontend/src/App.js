@@ -2,6 +2,12 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import "./App.css";
 
+// ✅ API base URL for local vs production
+const API_BASE =
+  process.env.NODE_ENV === "production"
+    ? "https://text2design-5.onrender.com" // Render backend URL
+    : "http://localhost:5000"; // Local backend
+
 function App() {
   const [prompt, setPrompt] = useState("");
   const [useCase, setUseCase] = useState("interior");
@@ -59,11 +65,12 @@ function App() {
     setError("");
     setImages([]);
     try {
-      const res = await fetch("https://text2design-5.onrender.com/api/generate-image", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ prompt, useCase, count })
+      const res = await fetch(`${API_BASE}/api/generate-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, useCase, count }),
       });
+
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setImages(data.images || []);
@@ -77,7 +84,7 @@ function App() {
 
   return (
     <div className="container">
-      <motion.h1 
+      <motion.h1
         className="title"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -87,7 +94,7 @@ function App() {
       </motion.h1>
 
       {/* Form Box */}
-      <motion.div 
+      <motion.div
         className="form-box"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -117,7 +124,7 @@ function App() {
               width: "50px",
               height: "50px",
               fontSize: "20px",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             🎤
@@ -157,10 +164,11 @@ function App() {
             />
           </motion.div>
         ))}
-        <div><h5>Designed and developed by Chethan K L  </h5></div>
+        <div>
+          <h5>Designed and developed by Chethan K L</h5>
+        </div>
       </div>
     </div>
-    
   );
 }
 
